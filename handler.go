@@ -130,6 +130,10 @@ func (h *Handler) addSeverity(ctx context.Context, l *goldjson.LineWriter, r *sl
 }
 
 func (h *Handler) addSourceLocation(ctx context.Context, l *goldjson.LineWriter, r *slog.Record) {
+	if !shouldAddSourceLocation(ctx) {
+		return
+	}
+
 	fs := runtime.CallersFrames([]uintptr{r.PC})
 	f, _ := fs.Next()
 
