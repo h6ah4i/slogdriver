@@ -12,9 +12,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/jussi-kalliokoski/slogdriver"
-	"github.com/jussi-kalliokoski/slogdriver/internal/require"
-	"github.com/jussi-kalliokoski/slogdriver/internal/slogtest"
+	"github.com/h6ah4i/slogdriver"
+	"github.com/h6ah4i/slogdriver/internal/require"
+	"github.com/h6ah4i/slogdriver/internal/slogtest"
 )
 
 func TestHandler(t *testing.T) {
