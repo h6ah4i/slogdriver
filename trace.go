@@ -9,7 +9,7 @@ type Trace struct {
 	Sampled bool
 }
 
-func traceFromContext(ctx context.Context) Trace {
+func TraceFromContext(ctx context.Context) Trace {
 	v, _ := ctx.Value(traceContextKeyT{}).(Trace)
 	return v
 }

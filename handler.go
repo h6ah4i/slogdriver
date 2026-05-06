@@ -14,16 +14,18 @@ import (
 
 // Config defines the Stackdriver configuration.
 type Config struct {
-	ProjectID string
-	Level     slog.Leveler
+	ProjectID        string
+	Level            slog.Leveler
+	TraceFromContext func(ctx context.Context) Trace
 }
 
 // Handler is a handler that writes the log entries in the stackdriver logging
 // JSON format.
 type Handler struct {
-	encoder      *goldjson.Encoder
-	config       Config
-	attrBuilders []func(ctx context.Context, h *Handler, l *goldjson.LineWriter, next func(context.Context) error) error
+	encoder          *goldjson.Encoder
+	config           Config
+	attrBuilders     []func(ctx context.Context, h *Handler, l *goldjson.LineWriter, next func(context.Context) error) error
+	traceFromContext func(ctx context.Context) Trace
 }
 
 // NewHandler returns a new Handler.
@@ -40,9 +42,16 @@ func NewHandler(w io.Writer, config Config) *Handler {
 	encoder.PrepareKey(fieldTraceSpanID)
 	encoder.PrepareKey(fieldTraceSampled)
 	encoder.PrepareKey(fieldLabels)
+
+	traceFromContext := config.TraceFromContext
+	if traceFromContext == nil {
+		traceFromContext = TraceFromContext
+	}
+
 	return &Handler{
-		encoder: encoder,
-		config:  config,
+		encoder:          encoder,
+		config:           config,
+		traceFromContext: traceFromContext,
 	}
 }
 
@@ -146,7 +155,7 @@ func (h *Handler) addSourceLocation(ctx context.Context, l *goldjson.LineWriter,
 }
 
 func (h *Handler) addTrace(ctx context.Context, l *goldjson.LineWriter, r *slog.Record) {
-	trace := traceFromContext(ctx)
+	trace := h.traceFromContext(ctx)
 	if trace.ID == "" {
 		return
 	}
